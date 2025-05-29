@@ -1,0 +1,7 @@
+/* TinySAM React Styles */
+
+/* We're not using Tailwind classes in the component, 
+   but keeping this for future customization options */
+@tailwind base;
+@tailwind components;
+@tailwind utilities; 
