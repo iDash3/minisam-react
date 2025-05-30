@@ -5,7 +5,7 @@ import {
   precomputeEmbedding,
   type ClickType,
   type SegmentationSession,
-} from "tinysam";
+} from "minisam";
 
 export interface Click {
   x: number;
@@ -13,13 +13,13 @@ export interface Click {
   type: ClickType;
 }
 
-export interface UseTinySamOptions {
+export interface UseMiniSamOptions {
   autoInit?: boolean;
   onInitialized?: () => void;
   onError?: (error: Error) => void;
 }
 
-export interface UseTinySamReturn {
+export interface UseMiniSamReturn {
   // State
   isInitialized: boolean;
   isLoading: boolean;
@@ -43,7 +43,7 @@ export interface UseTinySamReturn {
   extractMaskAsBlob: (type?: string, quality?: number) => Promise<Blob | null>;
 }
 
-export function useTinySam(options: UseTinySamOptions = {}): UseTinySamReturn {
+export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
   const { autoInit = true, onInitialized, onError } = options;
 
   // State
@@ -57,7 +57,7 @@ export function useTinySam(options: UseTinySamOptions = {}): UseTinySamReturn {
   const sessionRef = useRef<SegmentationSession | null>(null);
   const initPromiseRef = useRef<Promise<void> | null>(null);
 
-  // Initialize TinySAM
+  // Initialize miniSAM
   const initialize = useCallback(async () => {
     if (isInitialized) return;
 
@@ -73,7 +73,7 @@ export function useTinySam(options: UseTinySamOptions = {}): UseTinySamReturn {
         setIsInitialized(true);
         onInitialized?.();
       } catch (error) {
-        console.error("Failed to initialize TinySAM:", error);
+        console.error("Failed to initialize miniSAM:", error);
         onError?.(error as Error);
         throw error;
       } finally {

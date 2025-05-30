@@ -1,8 +1,8 @@
 {
-  "name": "@tinysam/react",
+  "name": "@minisam/react",
   "version": "0.1.0",
   "type": "module",
-  "description": "Ready-to-use React components for TinySAM browser-based image segmentation",
+  "description": "Ready-to-use React components for miniSAM browser-based image segmentation",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,7 +32,7 @@
   ],
   "keywords": [
     "react",
-    "tinysam",
+    "minisam",
     "segment-anything",
     "sam",
     "image-segmentation",
@@ -46,12 +46,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iDash3/tinysam.git"
+    "url": "git+https://github.com/iDash3/minisam.git"
   },
   "bugs": {
-    "url": "https://github.com/iDash3/tinysam/issues"
+    "url": "https://github.com/iDash3/minisam/issues"
   },
-  "homepage": "https://github.com/iDash3/tinysam#readme",
+  "homepage": "https://github.com/iDash3/minisam#readme",
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0",
@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "clsx": "^2.0.0",
-    "tinysam": "^0.2.4"
+    "minisam": "^0.2.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

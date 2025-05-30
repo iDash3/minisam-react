@@ -12,7 +12,7 @@ import {
   precomputeEmbedding,
   type ClickType,
   type SegmentationSession,
-} from "tinysam";
+} from "minisam";
 import clsx from "clsx";
 
 // Types
@@ -22,7 +22,7 @@ export interface Click {
   type: ClickType;
 }
 
-export interface TinySamRef {
+export interface MiniSamRef {
   // Control methods
   reset: () => void;
   undo: () => void;
@@ -38,7 +38,7 @@ export interface TinySamRef {
   segmentWithClicks: (clicks: Click[]) => Promise<void>;
 }
 
-export interface TinySamSegmenterProps {
+export interface MiniSamSegmenterProps {
   // Image source
   image?: string | File | HTMLImageElement;
 
@@ -82,7 +82,7 @@ export interface TinySamSegmenterProps {
       }) => React.ReactNode);
 }
 
-export const TinySamSegmenter = forwardRef<TinySamRef, TinySamSegmenterProps>(
+export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
   (
     {
       image,
@@ -124,7 +124,7 @@ export const TinySamSegmenter = forwardRef<TinySamRef, TinySamSegmenterProps>(
     const maskCanvasRef = useRef<HTMLCanvasElement>(null);
     const imageElementRef = useRef<HTMLImageElement | null>(null);
 
-    // Initialize TinySAM
+    // Initialize miniSAM
     useEffect(() => {
       if (!autoInit) return;
 
@@ -135,7 +135,7 @@ export const TinySamSegmenter = forwardRef<TinySamRef, TinySamSegmenterProps>(
           setIsInitialized(true);
           onInitialized?.();
         } catch (error) {
-          console.error("Failed to initialize TinySAM:", error);
+          console.error("Failed to initialize miniSAM:", error);
           onError?.(error as Error);
         } finally {
           setIsLoading(false);
@@ -472,15 +472,15 @@ export const TinySamSegmenter = forwardRef<TinySamRef, TinySamSegmenterProps>(
     };
 
     return (
-      <div ref={containerRef} className={clsx("tinysam-container", className)}>
+      <div ref={containerRef} className={clsx("minisam-container", className)}>
         <div
-          className="tinysam-canvas-wrapper"
+          className="minisam-canvas-wrapper"
           style={{ position: "relative", display: "inline-block" }}
         >
           <canvas
             ref={imageCanvasRef}
             onClick={handleCanvasClick}
-            className={clsx("tinysam-image-canvas", imageClassName, {
+            className={clsx("minisam-image-canvas", imageClassName, {
               "cursor-crosshair": loadedImage && !isLoading,
               "cursor-wait": isLoading,
             })}
@@ -489,7 +489,7 @@ export const TinySamSegmenter = forwardRef<TinySamRef, TinySamSegmenterProps>(
 
           <canvas
             ref={maskCanvasRef}
-            className={clsx("tinysam-mask-canvas", maskClassName)}
+            className={clsx("minisam-mask-canvas", maskClassName)}
             style={{
               position: "absolute",
               top: 0,
@@ -519,7 +519,7 @@ export const TinySamSegmenter = forwardRef<TinySamRef, TinySamSegmenterProps>(
               return (
                 <div
                   key={index}
-                  className={clsx("tinysam-click-marker", clickMarkerClassName)}
+                  className={clsx("minisam-click-marker", clickMarkerClassName)}
                   style={{
                     position: "absolute",
                     left: `${left}px`,
@@ -551,7 +551,7 @@ export const TinySamSegmenter = forwardRef<TinySamRef, TinySamSegmenterProps>(
   }
 );
 
-TinySamSegmenter.displayName = "TinySamSegmenter";
+MiniSamSegmenter.displayName = "MiniSamSegmenter";
 
 // Helper function to convert hex to rgb
 function hexToRgb(hex: string): { r: number; g: number; b: number } {

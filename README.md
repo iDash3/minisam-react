@@ -1,6 +1,6 @@
-# @tinysam/react
+# @minisam/react
 
-Ready-to-use React components for [TinySAM](https://github.com/iDash3/tinysam) - browser-based image segmentation using the Segment Anything Model.
+Ready-to-use React components for [miniSAM](https://github.com/iDash3/minisam) - browser-based image segmentation using the Segment Anything Model.
 
 ## Features
 
@@ -14,21 +14,21 @@ Ready-to-use React components for [TinySAM](https://github.com/iDash3/tinysam) -
 ## Installation
 
 ```bash
-npm install @tinysam/react tinysam onnxruntime-web
+npm install @minisam/react minisam onnxruntime-web
 # or
-yarn add @tinysam/react tinysam onnxruntime-web
+yarn add @minisam/react minisam onnxruntime-web
 # or
-pnpm add @tinysam/react tinysam onnxruntime-web
+pnpm add @minisam/react minisam onnxruntime-web
 ```
 
 ## Quick Start
 
 ```tsx
-import { TinySamSegmenter } from "@tinysam/react";
+import { MiniSamSegmenter } from "@minisam/react";
 
 function App() {
   return (
-    <TinySamSegmenter
+    <MiniSamSegmenter
       image="/path/to/image.jpg"
       onMaskUpdate={(mask) => console.log("New mask:", mask)}
     />
@@ -49,7 +49,7 @@ That's it! The component handles everything automatically:
 ### Basic Usage
 
 ```tsx
-<TinySamSegmenter
+<MiniSamSegmenter
   image="/path/to/image.jpg"
   onMaskUpdate={(mask) => {
     // Handle the generated mask
@@ -61,12 +61,12 @@ That's it! The component handles everything automatically:
 ### Advanced Usage with Custom UI
 
 ```tsx
-<TinySamSegmenter
+<MiniSamSegmenter
   image={imageFile}
   maskColor="#ff0000"
   maskOpacity={0.3}
   showClickMarkers={true}
-  onInitialized={() => console.log("TinySAM ready!")}
+  onInitialized={() => console.log("miniSAM ready!")}
   onError={(error) => console.error("Error:", error)}
 >
   {({ isLoading, clicks, reset, undo, setClickMode, extractMask }) => (
@@ -88,7 +88,7 @@ That's it! The component handles everything automatically:
       {isLoading && <p>Processing...</p>}
     </div>
   )}
-</TinySamSegmenter>
+</MiniSamSegmenter>
 ```
 
 ### Props
@@ -96,12 +96,12 @@ That's it! The component handles everything automatically:
 | Prop                | Type                                 | Default     | Description                      |
 | ------------------- | ------------------------------------ | ----------- | -------------------------------- |
 | `image`             | `string \| File \| HTMLImageElement` | -           | Image source to segment          |
-| `autoInit`          | `boolean`                            | `true`      | Auto-initialize TinySAM on mount |
+| `autoInit`          | `boolean`                            | `true`      | Auto-initialize miniSAM on mount |
 | `clickMode`         | `'include' \| 'exclude'`             | `'include'` | Default click mode               |
 | `onMaskUpdate`      | `(mask: ImageData \| null) => void`  | -           | Callback when mask changes       |
 | `onClicksUpdate`    | `(clicks: Click[]) => void`          | -           | Callback when clicks change      |
 | `onImageLoad`       | `(image: HTMLImageElement) => void`  | -           | Callback when image loads        |
-| `onInitialized`     | `() => void`                         | -           | Callback when TinySAM is ready   |
+| `onInitialized`     | `() => void`                         | -           | Callback when miniSAM is ready   |
 | `onError`           | `(error: Error) => void`             | -           | Error handler                    |
 | `className`         | `string`                             | -           | Container class name             |
 | `imageClassName`    | `string`                             | -           | Image canvas class name          |
@@ -118,9 +118,9 @@ That's it! The component handles everything automatically:
 Access component methods using a ref:
 
 ```tsx
-const segmenterRef = useRef<TinySamRef>(null);
+const segmenterRef = useRef<MiniSamRef>(null);
 
-<TinySamSegmenter ref={segmenterRef} image={image} />;
+<MiniSamSegmenter ref={segmenterRef} image={image} />;
 
 // Use ref methods
 segmenterRef.current?.reset();
@@ -141,10 +141,10 @@ Available methods:
 
 ## Hook API
 
-For more control, use the `useTinySam` hook:
+For more control, use the `useMiniSam` hook:
 
 ```tsx
-import { useTinySam } from "@tinysam/react";
+import { useMiniSam } from "@minisam/react";
 
 function MyComponent() {
   const {
@@ -157,7 +157,7 @@ function MyComponent() {
     addClick,
     reset,
     extractMaskAsBlob,
-  } = useTinySam();
+  } = useMiniSam();
 
   const handleImageUpload = async (file: File) => {
     await loadImage(file);
@@ -186,7 +186,7 @@ function MyComponent() {
 ### Hook Options
 
 ```tsx
-const tinysam = useTinySam({
+const minisam = useMiniSam({
   autoInit: true,
   onInitialized: () => console.log("Ready!"),
   onError: (error) => console.error(error),
@@ -197,7 +197,7 @@ const tinysam = useTinySam({
 
 | Property/Method         | Type                                         | Description                    |
 | ----------------------- | -------------------------------------------- | ------------------------------ |
-| `isInitialized`         | `boolean`                                    | Whether TinySAM is initialized |
+| `isInitialized`         | `boolean`                                    | Whether miniSAM is initialized |
 | `isLoading`             | `boolean`                                    | Loading state                  |
 | `image`                 | `HTMLImageElement \| null`                   | Loaded image                   |
 | `clicks`                | `Click[]`                                    | Current clicks                 |
@@ -223,7 +223,7 @@ import {
   trimCanvasToContent,
   downloadCanvas,
   getMaskBounds,
-} from "@tinysam/react";
+} from "@minisam/react";
 
 // Convert mask to canvas
 const canvas = maskToCanvas(mask);
@@ -260,7 +260,7 @@ function SimpleSegmenter() {
       />
 
       {imageUrl && (
-        <TinySamSegmenter
+        <MiniSamSegmenter
           image={imageUrl}
           onMaskUpdate={(mask) => {
             if (mask) {
@@ -279,7 +279,7 @@ function SimpleSegmenter() {
 ```tsx
 function FileUploadSegmenter() {
   const [file, setFile] = useState<File | null>(null);
-  const segmenterRef = useRef<TinySamRef>(null);
+  const segmenterRef = useRef<MiniSamRef>(null);
 
   const handleExtract = async () => {
     const mask = segmenterRef.current?.extractMask();
@@ -304,7 +304,7 @@ function FileUploadSegmenter() {
 
       {file && (
         <>
-          <TinySamSegmenter ref={segmenterRef} image={file} maskOpacity={0.7} />
+          <MiniSamSegmenter ref={segmenterRef} image={file} maskOpacity={0.7} />
 
           <button onClick={handleExtract}>Extract & Download</button>
         </>
@@ -318,7 +318,7 @@ function FileUploadSegmenter() {
 
 ```tsx
 function BatchProcessor() {
-  const { loadImage, segmentWithClicks, extractMaskAsBlob } = useTinySam();
+  const { loadImage, segmentWithClicks, extractMaskAsBlob } = useMiniSam();
 
   const processImages = async (files: File[]) => {
     const results = [];
@@ -353,20 +353,20 @@ The component uses minimal inline styles by default. You can customize everythin
 
 ```css
 /* Base container */
-.tinysam-container {
+.minisam-container {
   position: relative;
   display: inline-block;
 }
 
 /* Image canvas */
-.tinysam-image-canvas {
+.minisam-image-canvas {
   max-width: 100%;
   height: auto;
   cursor: crosshair;
 }
 
 /* Mask overlay */
-.tinysam-mask-canvas {
+.minisam-mask-canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -374,7 +374,7 @@ The component uses minimal inline styles by default. You can customize everythin
 }
 
 /* Click markers */
-.tinysam-click-marker {
+.minisam-click-marker {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
@@ -388,7 +388,7 @@ The component uses minimal inline styles by default. You can customize everythin
 
    ```tsx
    // In your app root
-   import { initSegmentation } from "tinysam";
+   import { initSegmentation } from "minisam";
 
    // Preload models
    initSegmentation().then(() => {
@@ -415,5 +415,5 @@ MIT © [Isaac Bautista Silva](https://isaacbs.com)
 
 ## Related
 
-- [tinysam](https://github.com/iDash3/tinysam) - Core TinySAM library
+- [minisam](https://github.com/iDash3/minisam) - Core miniSAM library
 - [Segment Anything](https://segment-anything.com/) - Original SAM by Meta AI

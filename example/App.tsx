@@ -1,15 +1,15 @@
 import React, { useState, useRef } from "react";
 import {
-  TinySamSegmenter,
-  TinySamRef,
+  MiniSamSegmenter,
+  MiniSamRef,
   downloadCanvas,
   applyMaskToImage,
-} from "@tinysam/react";
+} from "@minisam/react";
 
 function App() {
   const [imageUrl, setImageUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const segmenterRef = useRef<TinySamRef>(null);
+  const segmenterRef = useRef<MiniSamRef>(null);
 
   const handleExtract = () => {
     const mask = segmenterRef.current?.extractMask();
@@ -37,7 +37,7 @@ function App() {
 
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
-      <h1>TinySAM React Example</h1>
+      <h1>miniSAM React Example</h1>
 
       <div style={{ marginBottom: "20px" }}>
         <h2>Option 1: URL Input</h2>
@@ -68,10 +68,10 @@ function App() {
 
       {(imageUrl || file) && (
         <div>
-          <TinySamSegmenter
+          <MiniSamSegmenter
             ref={segmenterRef}
             image={file || imageUrl}
-            onInitialized={() => console.log("TinySAM initialized!")}
+            onInitialized={() => console.log("miniSAM initialized!")}
             onMaskUpdate={(mask) => console.log("Mask updated:", mask)}
             onError={(error) => console.error("Error:", error)}
             maskColor="#00ff00"
@@ -177,7 +177,7 @@ function App() {
                 </div>
               </div>
             )}
-          </TinySamSegmenter>
+          </MiniSamSegmenter>
         </div>
       )}
     </div>

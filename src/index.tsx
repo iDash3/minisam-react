@@ -1,16 +1,16 @@
-// Main exports for @tinysam/react
+// Main exports for @minisam/react
 
 // Components
-export { TinySamSegmenter } from "./components/TinySamSegmenter";
+export { MiniSamSegmenter } from "./components/MiniSamSegmenter";
 export type {
-  TinySamSegmenterProps,
-  TinySamRef,
+  MiniSamSegmenterProps,
+  MiniSamRef,
   Click,
-} from "./components/TinySamSegmenter";
+} from "./components/MiniSamSegmenter";
 
 // Hooks
-export { useTinySam } from "./hooks/useTinySam";
-export type { UseTinySamOptions, UseTinySamReturn } from "./hooks/useTinySam";
+export { useMiniSam } from "./hooks/useMiniSam";
+export type { UseMiniSamOptions, UseMiniSamReturn } from "./hooks/useMiniSam";
 
 // Utilities
 export {
@@ -22,5 +22,5 @@ export {
   getMaskBounds,
 } from "./utils/mask-utils";
 
-// Re-export ClickType from tinysam
-export type { ClickType } from "tinysam";
+// Re-export ClickType from minisam
+export type { ClickType } from "minisam";
