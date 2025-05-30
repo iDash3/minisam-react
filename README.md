@@ -4,12 +4,12 @@ Ready-to-use React components for [miniSAM](https://github.com/iDash3/minisam) -
 
 ## Features
 
-- 🚀 **Zero-config setup** - Just import and use
-- 🎨 **Fully customizable** - Style it your way
-- 🪝 **Hooks included** - For programmatic control
-- 📦 **Tiny bundle** - Optimized for production
-- 🎯 **TypeScript ready** - Full type support
-- 🖼️ **Automatic masking** - Click and segment
+- **Zero-config setup** - Just import and use
+- **Fully customizable** - Style it your way
+- **Hooks included** - For programmatic control
+- **Tiny bundle** - Optimized for production
+- **TypeScript ready** - Full type support
+- **Automatic masking** - Click and segment
 
 ## Installation
 
@@ -397,23 +397,3 @@ The component uses minimal inline styles by default. You can customize everythin
    ```
 
 2. **Reuse sessions**: The component maintains segmentation sessions automatically. Avoid recreating components unnecessarily.
-
-3. **Optimize images**: Large images work but may be slower. Consider resizing images before segmentation for better performance.
-
-## Browser Support
-
-- Chrome 90+
-- Firefox 89+
-- Safari 15+
-- Edge 90+
-
-WebAssembly and Web Workers are required for optimal performance.
-
-## License
-
-MIT © [Isaac Bautista Silva](https://isaacbs.com)
-
-## Related
-
-- [minisam](https://github.com/iDash3/minisam) - Core miniSAM library
-- [Segment Anything](https://segment-anything.com/) - Original SAM by Meta AI
