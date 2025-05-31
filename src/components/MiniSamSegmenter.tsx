@@ -113,7 +113,27 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
     const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(
       null
     );
-    const [clicks, setClicks] = useState<Click[]>([]);
+    const [clicks, setClicksRaw] = useState<Click[]>([]);
+    
+    // Wrapped setClicks to debug when clicks are cleared
+    const setClicks = useCallback((newClicks: Click[] | ((prev: Click[]) => Click[])) => {
+      if (typeof newClicks === 'function') {
+        setClicksRaw(prev => {
+          const result = newClicks(prev);
+          if (result.length === 0 && prev.length > 0) {
+            console.log('🚨 CLICKS CLEARED! Stack trace:');
+            console.trace();
+          }
+          return result;
+        });
+      } else {
+        if (newClicks.length === 0) {
+          console.log('🚨 CLICKS CLEARED! Stack trace:');
+          console.trace();
+        }
+        setClicksRaw(newClicks);
+      }
+    }, []);
     const [clickMode, setClickMode] = useState<ClickType>(initialClickMode);
     const [mask, setMask] = useState<ImageData | null>(null);
     const [session, setSession] = useState<SegmentationSession | null>(null);
@@ -124,6 +144,30 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
     const maskCanvasRef = useRef<HTMLCanvasElement>(null);
     const imageElementRef = useRef<HTMLImageElement | null>(null);
 
+    // Stable callback refs to avoid re-initialization
+    const onInitializedRef = useRef(onInitialized);
+    const onErrorRef = useRef(onError);
+    const onImageLoadRef = useRef(onImageLoad);
+    const onMaskUpdateRef = useRef(onMaskUpdate);
+    const onClicksUpdateRef = useRef(onClicksUpdate);
+
+    // Update refs when callbacks change
+    useEffect(() => {
+      onInitializedRef.current = onInitialized;
+      onErrorRef.current = onError;
+      onImageLoadRef.current = onImageLoad;
+      onMaskUpdateRef.current = onMaskUpdate;
+      onClicksUpdateRef.current = onClicksUpdate;
+    });
+
+    // Sync clickMode prop with internal state (preserve clicks when mode changes)
+    useEffect(() => {
+      if (clickMode !== initialClickMode) {
+        console.log(`🔄 Syncing clickMode prop: ${clickMode} -> ${initialClickMode} (preserving ${clicks.length} clicks)`);
+        setClickMode(initialClickMode);
+      }
+    }, [initialClickMode, clickMode, clicks.length]);
+
     // Initialize miniSAM
     useEffect(() => {
       if (!autoInit) return;
@@ -133,17 +177,17 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
           setIsLoading(true);
           await initSegmentation();
           setIsInitialized(true);
-          onInitialized?.();
+          onInitializedRef.current?.();
         } catch (error) {
           console.error("Failed to initialize miniSAM:", error);
-          onError?.(error as Error);
+          onErrorRef.current?.(error as Error);
         } finally {
           setIsLoading(false);
         }
       };
 
       init();
-    }, [autoInit, onInitialized, onError]);
+    }, [autoInit]);
 
     // Load image when prop changes
     useEffect(() => {
@@ -201,17 +245,17 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
           const newSession = createSession(img);
           setSession(newSession);
 
-          onImageLoad?.(img);
+          onImageLoadRef.current?.(img);
         } catch (error) {
           console.error("Error loading image:", error);
-          onError?.(error as Error);
+          onErrorRef.current?.(error as Error);
         } finally {
           setIsLoading(false);
         }
       };
 
       loadImage();
-    }, [image, isInitialized, onImageLoad, onError]);
+    }, [image, isInitialized]);
 
     // Handle canvas click
     const handleCanvasClick = useCallback(
@@ -232,8 +276,9 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         // Add click
         const newClick: Click = { x, y, type: clickMode };
         const newClicks = [...clicks, newClick];
+        console.log(`\u2795 Adding click:`, newClick, 'Total clicks:', newClicks.length);
         setClicks(newClicks);
-        onClicksUpdate?.(newClicks);
+        onClicksUpdateRef.current?.(newClicks);
 
         // Add click to session
         session.addClick(x, y, clickMode);
@@ -243,7 +288,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         try {
           const maskData = await session.segment(loadedImage);
           setMask(maskData);
-          onMaskUpdate?.(maskData);
+          onMaskUpdateRef.current?.(maskData);
 
           // Draw mask
           const maskCanvas = maskCanvasRef.current;
@@ -274,7 +319,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
           }
         } catch (error) {
           console.error("Segmentation error:", error);
-          onError?.(error as Error);
+          onErrorRef.current?.(error as Error);
         } finally {
           setIsLoading(false);
         }
@@ -286,21 +331,19 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         clickMode,
         clicks,
         maskColor,
-        onClicksUpdate,
-        onMaskUpdate,
-        onError,
       ]
     );
 
     // Reset
     const reset = useCallback(() => {
+      console.log('🔄 reset() called - clearing clicks');
       if (session) {
         session.reset();
       }
       setClicks([]);
       setMask(null);
-      onClicksUpdate?.([]);
-      onMaskUpdate?.(null);
+      onClicksUpdateRef.current?.([]);
+      onMaskUpdateRef.current?.(null);
 
       // Clear mask canvas
       const maskCanvas = maskCanvasRef.current;
@@ -308,7 +351,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         const ctx = maskCanvas.getContext("2d");
         ctx?.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
       }
-    }, [session, onClicksUpdate, onMaskUpdate]);
+    }, [session]);
 
     // Undo last click
     const undo = useCallback(async () => {
@@ -317,14 +360,14 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
       session.removeLastClick();
       const newClicks = clicks.slice(0, -1);
       setClicks(newClicks);
-      onClicksUpdate?.(newClicks);
+      onClicksUpdateRef.current?.(newClicks);
 
       if (newClicks.length > 0) {
         setIsLoading(true);
         try {
           const maskData = await session.segment(loadedImage);
           setMask(maskData);
-          onMaskUpdate?.(maskData);
+          onMaskUpdateRef.current?.(maskData);
 
           // Redraw mask
           const maskCanvas = maskCanvasRef.current;
@@ -354,7 +397,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
           }
         } catch (error) {
           console.error("Segmentation error:", error);
-          onError?.(error as Error);
+          onErrorRef.current?.(error as Error);
         } finally {
           setIsLoading(false);
         }
@@ -367,9 +410,6 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
       clicks,
       maskColor,
       reset,
-      onClicksUpdate,
-      onMaskUpdate,
-      onError,
     ]);
 
     // Segment with custom clicks
@@ -384,7 +424,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         });
 
         setClicks(newClicks);
-        onClicksUpdate?.(newClicks);
+        onClicksUpdateRef.current?.(newClicks);
 
         if (newClicks.length === 0) {
           reset();
@@ -395,7 +435,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         try {
           const maskData = await session.segment(loadedImage);
           setMask(maskData);
-          onMaskUpdate?.(maskData);
+          onMaskUpdateRef.current?.(maskData);
 
           // Draw mask
           const maskCanvas = maskCanvasRef.current;
@@ -425,7 +465,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
           }
         } catch (error) {
           console.error("Segmentation error:", error);
-          onError?.(error as Error);
+          onErrorRef.current?.(error as Error);
         } finally {
           setIsLoading(false);
         }
@@ -435,11 +475,22 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         loadedImage,
         maskColor,
         reset,
-        onClicksUpdate,
-        onMaskUpdate,
-        onError,
       ]
     );
+
+    // Custom setClickMode that preserves clicks and prevents side effects
+    const handleSetClickMode = useCallback((newMode: ClickType) => {
+      console.log(`🎯 setClickMode called: ${clickMode} -> ${newMode}`);
+      console.log(`📍 Current clicks before mode change:`, clicks);
+      
+      // Only update if mode actually changed
+      if (clickMode !== newMode) {
+        setClickMode(newMode);
+        console.log(`✅ Click mode updated, ${clicks.length} clicks preserved`);
+      } else {
+        console.log(`ℹ️ Click mode unchanged (${newMode}), no action needed`);
+      }
+    }, [clickMode, clicks]);
 
     // Expose methods via ref
     useImperativeHandle(
@@ -451,10 +502,10 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         getClicks: () => clicks,
         getMask: () => mask,
         getImage: () => loadedImage,
-        setClickMode,
+        setClickMode: handleSetClickMode,
         segmentWithClicks,
       }),
-      [reset, undo, mask, clicks, loadedImage, segmentWithClicks]
+      [reset, undo, mask, clicks, loadedImage, segmentWithClicks, handleSetClickMode]
     );
 
     // Render props
@@ -467,7 +518,7 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
       clickMode,
       reset,
       undo,
-      setClickMode,
+      setClickMode: handleSetClickMode,
       extractMask: () => mask,
     };
 

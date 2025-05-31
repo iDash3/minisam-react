@@ -56,6 +56,14 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
   // Refs
   const sessionRef = useRef<SegmentationSession | null>(null);
   const initPromiseRef = useRef<Promise<void> | null>(null);
+  const onInitializedRef = useRef(onInitialized);
+  const onErrorRef = useRef(onError);
+
+  // Update callback refs
+  useEffect(() => {
+    onInitializedRef.current = onInitialized;
+    onErrorRef.current = onError;
+  });
 
   // Initialize miniSAM
   const initialize = useCallback(async () => {
@@ -71,10 +79,10 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
         setIsLoading(true);
         await initSegmentation();
         setIsInitialized(true);
-        onInitialized?.();
+        onInitializedRef.current?.();
       } catch (error) {
         console.error("Failed to initialize miniSAM:", error);
-        onError?.(error as Error);
+        onErrorRef.current?.(error as Error);
         throw error;
       } finally {
         setIsLoading(false);
@@ -83,7 +91,7 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
     })();
 
     return initPromiseRef.current;
-  }, [isInitialized, onInitialized, onError]);
+  }, [isInitialized]);
 
   // Auto-initialize
   useEffect(() => {
@@ -137,13 +145,13 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
         sessionRef.current = createSession(img);
       } catch (error) {
         console.error("Error loading image:", error);
-        onError?.(error as Error);
+        onErrorRef.current?.(error as Error);
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [isInitialized, initialize, onError]
+    [isInitialized, initialize]
   );
 
   // Add click
@@ -165,13 +173,13 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
         return maskData;
       } catch (error) {
         console.error("Segmentation error:", error);
-        onError?.(error as Error);
+        onErrorRef.current?.(error as Error);
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [image, onError]
+    [image]
   );
 
   // Remove last click
@@ -189,7 +197,7 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
         return maskData;
       } catch (error) {
         console.error("Segmentation error:", error);
-        onError?.(error as Error);
+        onErrorRef.current?.(error as Error);
         throw error;
       } finally {
         setIsLoading(false);
@@ -197,7 +205,7 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
     } else {
       setMask(null);
     }
-  }, [image, clicks, onError]);
+  }, [image, clicks]);
 
   // Reset
   const reset = useCallback(() => {
@@ -226,7 +234,7 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [image, clicks, onError]);
+  }, [image, clicks]);
 
   // Segment with specific clicks
   const segmentWithClicks = useCallback(
@@ -254,13 +262,13 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
         return maskData;
       } catch (error) {
         console.error("Segmentation error:", error);
-        onError?.(error as Error);
+        onErrorRef.current?.(error as Error);
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [image, onError]
+    [image]
   );
 
   // Extract mask as canvas
