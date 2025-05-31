@@ -14,6 +14,7 @@ import {
   type SegmentationSession,
 } from "minisam";
 import clsx from "clsx";
+import { createAsyncOperationQueue } from "../utils/async-queue";
 
 // Types
 export interface Click {
@@ -137,6 +138,9 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
     const [clickMode, setClickMode] = useState<ClickType>(initialClickMode);
     const [mask, setMask] = useState<ImageData | null>(null);
     const [session, setSession] = useState<SegmentationSession | null>(null);
+    
+    // Async operation queue to prevent concurrent ONNX calls
+    const asyncQueueRef = useRef(createAsyncOperationQueue());
 
     // Refs
     const containerRef = useRef<HTMLDivElement>(null);
@@ -283,10 +287,12 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
         // Add click to session
         session.addClick(x, y, clickMode);
 
-        // Perform segmentation
+        // Perform segmentation with queue to prevent concurrent ONNX calls
         setIsLoading(true);
         try {
-          const maskData = await session.segment(loadedImage);
+          const maskData = await asyncQueueRef.current.enqueue(() => 
+            session.segment(loadedImage)
+          ) as ImageData;
           setMask(maskData);
           onMaskUpdateRef.current?.(maskData);
 
@@ -365,7 +371,9 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
       if (newClicks.length > 0) {
         setIsLoading(true);
         try {
-          const maskData = await session.segment(loadedImage);
+          const maskData = await asyncQueueRef.current.enqueue(() => 
+            session.segment(loadedImage)
+          ) as ImageData;
           setMask(maskData);
           onMaskUpdateRef.current?.(maskData);
 
@@ -433,7 +441,9 @@ export const MiniSamSegmenter = forwardRef<MiniSamRef, MiniSamSegmenterProps>(
 
         setIsLoading(true);
         try {
-          const maskData = await session.segment(loadedImage);
+          const maskData = await asyncQueueRef.current.enqueue(() => 
+            session.segment(loadedImage)
+          ) as ImageData;
           setMask(maskData);
           onMaskUpdateRef.current?.(maskData);
 

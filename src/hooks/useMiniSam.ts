@@ -6,6 +6,7 @@ import {
   type ClickType,
   type SegmentationSession,
 } from "minisam";
+import { createAsyncOperationQueue } from "../utils/async-queue";
 
 export interface Click {
   x: number;
@@ -58,6 +59,7 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
   const initPromiseRef = useRef<Promise<void> | null>(null);
   const onInitializedRef = useRef(onInitialized);
   const onErrorRef = useRef(onError);
+  const asyncQueueRef = useRef(createAsyncOperationQueue());
 
   // Update callback refs
   useEffect(() => {
@@ -168,7 +170,9 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
 
       setIsLoading(true);
       try {
-        const maskData = await sessionRef.current.segment(image);
+        const maskData = await asyncQueueRef.current.enqueue(() => 
+          sessionRef.current!.segment(image)
+        ) as ImageData;
         setMask(maskData);
         return maskData;
       } catch (error) {
@@ -192,7 +196,9 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
     if (clicks.length > 1) {
       setIsLoading(true);
       try {
-        const maskData = await sessionRef.current.segment(image);
+        const maskData = await asyncQueueRef.current.enqueue(() => 
+          sessionRef.current!.segment(image)
+        ) as ImageData;
         setMask(maskData);
         return maskData;
       } catch (error) {
@@ -224,7 +230,9 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
 
     setIsLoading(true);
     try {
-      const maskData = await sessionRef.current.segment(image);
+      const maskData = await asyncQueueRef.current.enqueue(() => 
+        sessionRef.current!.segment(image)
+      ) as ImageData;
       setMask(maskData);
       return maskData;
     } catch (error) {
@@ -257,7 +265,9 @@ export function useMiniSam(options: UseMiniSamOptions = {}): UseMiniSamReturn {
 
       setIsLoading(true);
       try {
-        const maskData = await sessionRef.current.segment(image);
+        const maskData = await asyncQueueRef.current.enqueue(() => 
+          sessionRef.current!.segment(image)
+        ) as ImageData;
         setMask(maskData);
         return maskData;
       } catch (error) {

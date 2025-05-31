@@ -21,6 +21,8 @@ export {
   downloadCanvas,
   getMaskBounds,
 } from "./utils/mask-utils";
+export { createAsyncOperationQueue } from "./utils/async-queue";
+export type { AsyncOperationQueue } from "./utils/async-queue";
 
 // Re-export ClickType from minisam
 export type { ClickType } from "minisam";
