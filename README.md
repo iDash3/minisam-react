@@ -1,4 +1,4 @@
-# @minisam/react
+# minisam-react
 
 Ready-to-use React components for [miniSAM](https://github.com/iDash3/minisam) - browser-based image segmentation using the Segment Anything Model.
 
@@ -14,17 +14,17 @@ Ready-to-use React components for [miniSAM](https://github.com/iDash3/minisam) -
 ## Installation
 
 ```bash
-npm install @minisam/react minisam onnxruntime-web
+npm install minisam-react minisam onnxruntime-web
 # or
-yarn add @minisam/react minisam onnxruntime-web
+yarn add minisam-react minisam onnxruntime-web
 # or
-pnpm add @minisam/react minisam onnxruntime-web
+pnpm add minisam-react minisam onnxruntime-web
 ```
 
 ## Quick Start
 
 ```tsx
-import { MiniSamSegmenter } from "@minisam/react";
+import { MiniSamSegmenter } from "minisam-react";
 
 function App() {
   return (
@@ -144,7 +144,7 @@ Available methods:
 For more control, use the `useMiniSam` hook:
 
 ```tsx
-import { useMiniSam } from "@minisam/react";
+import { useMiniSam } from "minisam-react";
 
 function MyComponent() {
   const {
@@ -223,7 +223,7 @@ import {
   trimCanvasToContent,
   downloadCanvas,
   getMaskBounds,
-} from "@minisam/react";
+} from "minisam-react";
 
 // Convert mask to canvas
 const canvas = maskToCanvas(mask);
